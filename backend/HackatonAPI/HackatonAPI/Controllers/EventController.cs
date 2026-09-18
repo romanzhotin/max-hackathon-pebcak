@@ -6,7 +6,7 @@ using System.Xml;
 namespace HackatonAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("Events")]
     public class EventController : ControllerBase
     {
         private readonly string[] allowedCities =
@@ -14,7 +14,7 @@ namespace HackatonAPI.Controllers
             "msk", "spb", "nn", "kzn", "hbr",
         };
 
-        [HttpGet("/{city}")]
+        [HttpGet("{city}")]
         public async Task<ActionResult<List<JsonElement>>> GetEvents(string city)
         {
             if (!allowedCities.Contains(city))
