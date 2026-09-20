@@ -10,7 +10,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - /D/Kirill/Databases/test:/var/lib/postgresql/data:rw
+      - /home/${USER}/database:/var/lib/postgresql/data:rw
   
   bot:
     build:
