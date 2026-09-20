@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: MaxDB
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - /home/${USER}/database:/var/lib/postgresql/data:rw
+  
+  bot:
+    build:
+      context: ./bot
+      dockerfile: ./Dockerfile
+    container_name: MaxBot
+    restart: unless-stopped
+    environment:
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
+    
+  backend:
+    build:
+      context: ./backend/HackatonAPI
+      dockerfile: ./HackatonAPI/Dockerfile
+    container_name: BackendAPI
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DB_HOST: postgres
+      DB_PORT: ${POSTGRES_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}

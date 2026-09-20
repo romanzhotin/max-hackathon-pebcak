@@ -12,7 +12,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["HackatonAPI/HackatonAPI.csproj", "HackatonAPI/"]
+COPY ["./HackatonAPI/HackatonAPI.csproj", "HackatonAPI/"]
 RUN dotnet restore "./HackatonAPI/HackatonAPI.csproj"
 COPY . .
 WORKDIR "/src/HackatonAPI"
