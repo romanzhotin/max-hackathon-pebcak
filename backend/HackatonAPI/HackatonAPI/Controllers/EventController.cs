@@ -14,8 +14,22 @@ namespace HackatonAPI.Controllers
             "msk", "spb", "nn", "kzn", "hbr",
         };
 
-        [HttpGet("{city}")]
-        public async Task<ActionResult<List<JsonElement>>> GetEvents(string city)
+        private readonly Dictionary<string, string> eventRoutes = new()
+        {
+            { "default", "" },
+            { "koncert", "bilety-na-koncert" },
+            { "teart", "bilety-v-teatr" },
+            { "shou", "bilety-na-shou" },
+            { "kino", "bilety-v-kino" },
+            { "children", "detskaya-afisha" },
+            { "festivals", "bilety-na-festival" },
+            { "excursions", "bilety-na-ekskursii" },
+            { "sport", "bilety-na-sportivnye-meropriyatiya" },
+            { "education", "obrazovanie-i-kursy" },
+        };
+
+        [HttpGet("{city}/{eventType}")]
+        public async Task<ActionResult<List<JsonElement>>> GetEvents(string city, string eventType)
         {
             if (!allowedCities.Contains(city))
             {
@@ -26,7 +40,17 @@ namespace HackatonAPI.Controllers
                     Detail = "The city is not in the list of allowed cities"
                 });
             }
-            var url = $"https://{city}.kassir.ru";
+
+            if (!eventRoutes.ContainsKey(eventType))
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Unknown event type",
+                    Detail = "The event type is unknown"
+                });
+            }
+            var url = $"https://{city}.kassir.ru/{eventRoutes[eventType]}";
 
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent",
