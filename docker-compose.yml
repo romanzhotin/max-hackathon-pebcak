@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17
-    container_name: MaxDB
+    container_name: maxdb
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -16,7 +16,7 @@ services:
     build:
       context: ./bot
       dockerfile: ./Dockerfile
-    container_name: MaxBot
+    container_name: maxbot
     restart: unless-stopped
     environment:
       MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
@@ -25,7 +25,7 @@ services:
     build:
       context: ./backend/HackatonAPI
       dockerfile: ./HackatonAPI/Dockerfile
-    container_name: BackendAPI
+    container_name: backendapi
     restart: unless-stopped
     ports:
       - "8080:8080"
