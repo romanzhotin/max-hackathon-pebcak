@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/bot/main.py",
             "console": "integratedTerminal",
             "env": {
-                "USE_DOTENV": "1", // for manual launch via vscode
+                "MANUAL_LAUNCH": "1", // for manual launch via vscode
             }
         }
     ]
