@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-use_dotenv = os.getenv("USE_DOTENV", "0")
+use_dotenv = os.getenv("MANUAL_LAUNCH", "0")
 
 if (use_dotenv == "1"):
     load_dotenv()
