@@ -2,6 +2,8 @@
 using System.Text.Json;
 using HtmlAgilityPack;
 using System.Xml;
+using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace HackatonAPI.Controllers
 {
@@ -18,7 +20,7 @@ namespace HackatonAPI.Controllers
         {
             { "default", "" },
             { "koncert", "bilety-na-koncert" },
-            { "teart", "bilety-v-teatr" },
+            { "teatr", "bilety-v-teatr" },
             { "shou", "bilety-na-shou" },
             { "kino", "bilety-v-kino" },
             { "children", "detskaya-afisha" },
@@ -29,7 +31,13 @@ namespace HackatonAPI.Controllers
         };
 
         [HttpGet("{city}/{eventType}")]
-        public async Task<ActionResult<List<JsonElement>>> GetEvents(string city, string eventType)
+        public async Task<ActionResult<List<JsonElement>>> GetEvents(
+            string city,
+            string eventType,
+            [FromQuery] int? minPrice,
+            [FromQuery] int? maxPrice,
+            [FromQuery] DateTimeOffset? maxDate
+            )
         {
             if (!allowedCities.Contains(city))
             {
@@ -87,7 +95,7 @@ namespace HackatonAPI.Controllers
 
                 // here serializing only events
 
-                var result = new List<JsonElement>();
+                var events = new List<JsonElement>();
 
                 using var jsonDoc = JsonDocument.Parse(jsonContext, new JsonDocumentOptions
                 {
@@ -106,7 +114,7 @@ namespace HackatonAPI.Controllers
                     {
                         if (IsEvent(item))
                         {
-                            result.Add(item.Clone());
+                            events.Add(item.Clone());
                         }
                     }
                 }
@@ -118,16 +126,37 @@ namespace HackatonAPI.Controllers
                         {
                             if (IsEvent(item))
                             {
-                                result.Add(item.Clone());
+                                events.Add(item.Clone());
                             }
                         }
                     }
                     else if (IsEvent(root))
                     {
-                        result.Add(root.Clone());
+                        events.Add(root.Clone());
                     }
                 }
-                return Ok(result);
+
+                // if not given filter params - return all
+                if (minPrice is null && maxPrice is null && maxDate is null)
+                {
+                    return Ok(events);
+                }
+
+                try
+                {
+                    var result = FilterEvents(events, minPrice, maxPrice, maxDate);
+
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new ProblemDetails
+                    {
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = ex.Message
+                    });
+                }
+                
             }
 
             return BadRequest(new ProblemDetails
@@ -135,6 +164,47 @@ namespace HackatonAPI.Controllers
                 Status = StatusCodes.Status400BadRequest,
                 Title = "More than 2 elements",
             });
+        }
+
+        // filter events
+        private static List<JsonElement> 
+            FilterEvents(List<JsonElement> events, int? minPrice, int? maxPrice, DateTimeOffset? maxDate)
+        {
+            List<JsonElement> result = new List<JsonElement>();
+            foreach (var e in events)
+            {
+                bool acceptPrice = false, acceptDate = false;
+
+                // price
+                var offerInfo = e.GetProperty("offers");
+
+                if (offerInfo.ValueKind != JsonValueKind.Object)
+                {
+                    throw new Exception("Event has no property \"offers\"");
+                }
+
+                var price = offerInfo.GetProperty("price").GetInt32();
+
+                if (price >= (minPrice ?? 0) && price <= (maxPrice ?? int.MaxValue))
+                {
+                    acceptPrice = true;
+                }
+
+                // date
+                var startDate = e.GetProperty("startDate").GetDateTimeOffset();
+
+                if (startDate <= (maxDate ?? DateTimeOffset.MaxValue))
+                {
+                    acceptDate = true;
+                }
+
+                if (acceptPrice && acceptDate)
+                {
+                    result.Add(e.Clone());
+                }
+            }
+
+            return result;
         }
 
         // check if the JsonElement is event
@@ -172,5 +242,6 @@ namespace HackatonAPI.Controllers
             }
             return false;
         }
+
     }
 }
