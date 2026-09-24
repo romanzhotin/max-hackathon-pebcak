@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using HtmlAgilityPack;
-using System.Xml;
-using System.ComponentModel;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace HackatonAPI.Controllers
 {
