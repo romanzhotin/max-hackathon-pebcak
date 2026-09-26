@@ -15,14 +15,20 @@ namespace HackatonAPI.Controllers
     public class UsersController : ControllerBase
     {
         [HttpGet("{maxId}")]
-        public async Task<ActionResult<User>> GetUser(long maxId)
+        public async Task<ActionResult<User>> GetUser(string maxId)
         {
             await using var ctx = new UsersContext();
 
             await ctx.Database.EnsureCreatedAsync();
 
+            // parsing maxId to long type
+            if (!long.TryParse(maxId, out long maxIdL))
+            {
+                return BadRequest("Given ID is incorrect");
+            }
+
             var user = ctx.Users
-                .Where(u => u.MaxId == maxId)
+                .Where(u => u.MaxId == maxIdL)
                 .FirstOrDefault();
 
             if (user is null)
@@ -34,17 +40,23 @@ namespace HackatonAPI.Controllers
         }
 
         [HttpPost("{maxId}")]
-        public async Task<ActionResult> AddOrUpdateUser(long maxId, CreateOrUpdateUserRequest request)
+        public async Task<ActionResult> AddOrUpdateUser(string maxId, CreateOrUpdateUserRequest request)
         {
             await using var ctx = new UsersContext();
 
             await ctx.Database.EnsureCreatedAsync();
 
+            // parsing maxId to long type
+            if (!long.TryParse(maxId, out long maxIdL))
+            {
+                return BadRequest("Given ID is incorrect");
+            }
+
             try
             {
                 // get user
                 var user = ctx.Users
-                    .Where(u => u.MaxId == maxId)
+                    .Where(u => u.MaxId == maxIdL)
                     .FirstOrDefault();
 
                 if (user is null)
@@ -52,7 +64,7 @@ namespace HackatonAPI.Controllers
                     // create
                     ctx.Users.Add(new User
                     {
-                        MaxId = maxId,
+                        MaxId = maxIdL,
                         City = request.City,
                         Categories = request.Categories
                     });
