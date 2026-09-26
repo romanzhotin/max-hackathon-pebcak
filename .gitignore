@@ -448,3 +448,5 @@ htmlcov/
 # PyCharm
 .idea/
 *.iml
+
+*/.env
