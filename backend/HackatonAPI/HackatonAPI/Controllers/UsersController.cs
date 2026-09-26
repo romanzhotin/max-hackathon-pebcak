@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HackatonAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HackatonAPI.Controllers
 {
