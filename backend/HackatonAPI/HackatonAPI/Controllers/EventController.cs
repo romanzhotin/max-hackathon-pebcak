@@ -33,7 +33,8 @@ namespace HackatonAPI.Controllers
             string eventType,
             [FromQuery] int? minPrice,
             [FromQuery] int? maxPrice,
-            [FromQuery] DateTimeOffset? maxDate
+            [FromQuery] DateTimeOffset? minStartDate,
+            [FromQuery] DateTimeOffset? maxEndDate
             )
         {
             if (!allowedCities.Contains(city))
@@ -134,14 +135,14 @@ namespace HackatonAPI.Controllers
                 }
 
                 // if not given filter params - return all
-                if (minPrice is null && maxPrice is null && maxDate is null)
+                if (minPrice is null && maxPrice is null && minStartDate is null && maxEndDate is null)
                 {
                     return Ok(events);
                 }
 
                 try
                 {
-                    var result = FilterEvents(events, minPrice, maxPrice, maxDate);
+                    var result = FilterEvents(events, minPrice, maxPrice, minStartDate, maxEndDate);
 
                     return Ok(result);
                 }
@@ -165,7 +166,7 @@ namespace HackatonAPI.Controllers
 
         // filter events
         private static List<JsonElement> 
-            FilterEvents(List<JsonElement> events, int? minPrice, int? maxPrice, DateTimeOffset? maxDate)
+            FilterEvents(List<JsonElement> events, int? minPrice, int? maxPrice, DateTimeOffset? minStartDate, DateTimeOffset? maxEndDate)
         {
             List<JsonElement> result = new List<JsonElement>();
             foreach (var e in events)
@@ -190,7 +191,7 @@ namespace HackatonAPI.Controllers
                 // date
                 var startDate = e.GetProperty("startDate").GetDateTimeOffset();
 
-                if (startDate <= (maxDate ?? DateTimeOffset.MaxValue))
+                if (startDate >= (minStartDate ?? startDate) && startDate <= (maxEndDate ?? startDate))
                 {
                     acceptDate = true;
                 }
