@@ -56,6 +56,24 @@ services:
       - backend
     restart: unless-stopped
 
+  nginx-acme:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates2:/etc/nginx/templates:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    environment:
+      - $DOMAIN_NAME=${DOMAIN_NAME}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    profiles:
+      - acme
+
   certbot:
     image: certbot/certbot
     volumes:
@@ -64,5 +82,7 @@ services:
     entrypoint: >
       sh -c "certbot certonly --webroot -w /var/www/certbot
       -d ${DOMAIN_NAME} --email ${CETRBOT_EMAIL} --agree-tos --no-eff-email"
+    profiles:
+      - acme
 
 
