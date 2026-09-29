@@ -27,8 +27,10 @@ services:
       dockerfile: ./HackatonAPI/Dockerfile
     container_name: backendapi
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"
+    expose:
+      - "8080"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DB_HOST: postgres
@@ -37,3 +39,28 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
       CONN_STRING: ${CONN_STRING}
+  
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      sh -c "certbot certonly --webroot -w /var/www/certbot
+      -d example.com --email ${CETRBOT_EMAIL} --agree-tos --no-eff-email"
+
+
