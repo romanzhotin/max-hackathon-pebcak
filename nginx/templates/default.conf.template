@@ -6,6 +6,7 @@ server {
     ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
 
+
     location / {
         proxy_pass http://backend:8080/;
         
@@ -22,5 +23,12 @@ server {
 server {
     listen 80;
     server_name ${DOMAIN_NAME};
-    return 301 https://$host$request_uri;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;   # путь должен совпадать с --webroot-path
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
 }
