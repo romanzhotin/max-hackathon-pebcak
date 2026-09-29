@@ -1,0 +1,83 @@
+version: "1.0"
+
+solution: "PEBCAK / Чат-бот «Досуг и развлечения» в MAX"
+
+base_url: "https://maxhack.livvyy.ru/"
+
+required_checks:
+  - name: "Получение событий"
+    endpoint: "GET /Events/{city}/{eventType}"
+    critical: true
+  - name: "Получение пользователя"
+    endpoint: "GET /users/{maxId}"
+    critical: true
+  - name: "Создание/обновление пользователя"
+    endpoint: "POST /users/{maxId}"
+    critical: true
+
+endpoints:
+
+  - path: "/Events/{city}/{eventType}"
+    method: "GET"
+    role: "guest"
+    parameters:
+      path:
+        city:      { type: string, required: true }
+        eventType: { type: string, required: true }
+      query:
+        minPrice:     { type: integer, required: false }
+        maxPrice:     { type: integer, required: false }
+        minStartDate: { type: string, format: date-time, required: false }
+        maxEndDate:   { type: string, format: date-time, required: false }
+    expected_status_codes: [200, 400]
+    expected_response:
+      content_types:
+        - "application/json"
+      schema:
+        type: array
+        items:
+          type: object
+
+  - path: "/users/{maxId}"
+    method: "GET"
+    role: "user"
+    parameters:
+      path:
+        maxId: { type: string, required: true }
+    expected_status_codes: [200, 400, 404]
+    expected_response:
+      content_types:
+        - "application/json"
+      schema:
+        $ref: "#/schemas/User"
+
+  - path: "/users/{maxId}"
+    method: "POST"
+    role: "user"
+    parameters:
+      path:
+        maxId: { type: string, required: true }
+      headers:
+        Content-Type: "application/json"
+      body:
+        schema: "#/schemas/CreateUserRequest"
+    expected_status_codes: [200, 400]
+    expected_response:
+      content_types: []
+      schema: null
+
+schemas:
+
+  User:
+    required: [id, maxId, city, categories]
+    properties:
+      id:         { type: integer }
+      maxId:      { type: integer, nullable: true }
+      city:       { type: string,  nullable: true }
+      categories: { type: array,   items: string, nullable: true }
+
+  CreateUserRequest:
+    required: [city, categories]
+    properties:
+      city:       { type: string }
+      categories: { type: array, items: string, nullable: true }
