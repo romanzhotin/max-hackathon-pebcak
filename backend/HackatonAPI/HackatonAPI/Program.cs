@@ -8,16 +8,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Настройка Forwarded Headers
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                               ForwardedHeaders.XForwardedProto |
-                               ForwardedHeaders.XForwardedHost;
 
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
 
 var app = builder.Build();
 
