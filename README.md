@@ -218,6 +218,8 @@ curl "http://localhost:5215/Events/msk/koncert?minPrice=500&maxPrice=2000" | jq
 
 `maxId` — это ID пользователя в MAX, парсим в `long`.
 
+Проверить все эндпоинты вручную можно через swagger: https://maxhack.livvyy.ru/swagger/index.html
+
 ---
 
 ## Про бота чуть подробнее
