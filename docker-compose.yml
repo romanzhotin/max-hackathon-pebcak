@@ -50,13 +50,11 @@ services:
       - ${DATA_DIR}/certbot/www:/var/www/certbot:ro
     environment:
       DOMAIN_NAME: ${DOMAIN_NAME}
-    depends_on:
-      - backend
     restart: unless-stopped
 
   nginx-acme:
     image: nginx:alpine
-    container_name: nginx-proxy
+    container_name: nginx-proxy-acme
     ports:
       - "80:80"
       - "443:443"
