@@ -450,3 +450,5 @@ htmlcov/
 *.iml
 
 */.env
+
+*/prefs.json
